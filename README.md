@@ -1,10 +1,13 @@
 # Agent Status
 
-An Omarchy bar widget that shows every open coding-agent session as a chip:
-the vendor's mark, the session name, a ring that spins while the agent works
-and a pulse the moment it is done.
+An Omarchy bar widget that shows your open coding-agent sessions as chips.
+Each chip carries the agent's mark, the session name, a ring that spins while
+the agent works and a pulse the moment it is waiting for you.
 
-![The left bar section: a finished Claude session and a working Codex session](preview.png)
+![The left bar section: a finished Claude Code session and a working Codex session](preview.png)
+
+**Supported agents:** Claude Code and Codex. Nothing else is detected yet,
+see [Adding an agent](#adding-an-agent).
 
 ## Install
 
@@ -12,8 +15,12 @@ and a pulse the moment it is done.
 omarchy plugin add https://github.com/mae240/omarchy-agent-status.git --enable
 ```
 
-Requires Omarchy 4 (Quattro). The widget lands in the left bar section next to
-the workspaces; move it with `omarchy bar move io.github.mae240.agent-status --section right`.
+Requires Omarchy 4 (Quattro) with a horizontal bar. The widget lands in the
+left bar section next to the workspaces. To move it:
+
+```bash
+omarchy bar move io.github.mae240.agent-status --section right
+```
 
 ## Remove
 
@@ -21,46 +28,89 @@ the workspaces; move it with `omarchy bar move io.github.mae240.agent-status --s
 omarchy plugin remove io.github.mae240.agent-status
 ```
 
-This disables the widget, drops its entry from `~/.config/omarchy/shell.json`
-and deletes the plugin directory. Nothing else is written to your system.
+This disables the widget, removes its entry from `~/.config/omarchy/shell.json`
+and deletes the plugin directory. The plugin writes nothing else to your system.
 
-## How it works
+## What you see
 
-Nothing is polled and no agent is asked anything. The widget only reads the
-terminal title of open windows, which both CLIs keep up to date.
+| State     | Chip                                                           |
+|-----------|----------------------------------------------------------------|
+| working   | spinning arc, mark and name dimmed                             |
+| done      | closed ring and a `✓`, with a short green pulse on the switch  |
+| attention | breathing ring and a `!` in the theme's urgent color           |
 
-| Agent       | Title                                          | Comes from |
-|-------------|------------------------------------------------|------------|
-| Claude Code | `◐ <session>` working, `✳ <session>` done, `! <session>` needs a decision | out of the box |
-| Codex       | `<Run state> \| <thread title> \| <project>`     | `[tui] terminal_title` in `~/.codex/config.toml` |
-| Codex       | `⠋ <session>` while working                     | fallback when no run state is configured |
+- Clicking a chip focuses that terminal window.
+- Hovering shows the agent, the full session name and its state.
+- At most `maxSessions` chips are drawn. The rest is summed up in one `+n`
+  chip whose tooltip lists the hidden sessions.
+- The chips share a width budget of roughly a quarter of the screen. Names are
+  elided sooner while several sessions are open, and when even the shortest
+  labels would not fit, fewer chips are drawn and `+n` grows instead. The left
+  section never reaches the centered clock.
+- The widget hides itself while no session is open and in a vertical bar.
 
-For the full Codex chip, set:
+## How detection works
+
+The widget never runs a command and never polls an agent. It only reads the
+window title of open terminals, which both CLIs keep up to date, through
+Quickshell's toplevel list.
+
+### Claude Code
+
+Works out of the box. Claude Code writes its state into the terminal title:
+
+| Title             | Meaning               |
+|-------------------|-----------------------|
+| `◐ my-session`    | working               |
+| `✳ my-session`    | done, waiting for you |
+
+The session name is whatever Claude Code puts after the glyph, usually a short
+summary of the conversation. Claude Code does not signal a pending permission
+prompt in the title, so a session that waits for your approval looks the same
+as one that is still working. Inside tmux, screen or zellij Claude Code writes
+the static `✳` all the time, so those sessions always show as done.
+
+### Codex
+
+Codex shows its full state only when its terminal title is configured. Add
+this to `~/.codex/config.toml`:
 
 ```toml
 [tui]
 terminal_title = ["run-state", "thread-title", "project-name"]
 ```
 
-Only terminal windows are parsed: everything `omarchy-launch-tui` opens
-(`org.omarchy.*`, including `org.omarchy.agent`) plus foot, Alacritty, Ghostty,
-kitty and WezTerm. That keeps ordinary window titles such as `Inbox | Mail`
-out of the bar.
+The title then reads `<Run state> | <thread title> | <project>`, which gives
+the chip the thread title as its name, the project in the tooltip and the
+run state as its status. `Ready`, `Idle` and `Done` count as done; `Waiting`,
+`Blocked` and `Approval` as attention; any other word as working. Until Codex
+has named the thread the chip reads `Codex`. Note that Codex keeps reporting
+`Working` while an approval prompt is open; `Waiting` currently only appears
+while it waits on a background terminal, so the attention state is rare.
 
-## States
+Without that setting Codex only shows a braille spinner (`⠋ my-session`)
+while it works, so the chip can only ever report "working" and disappears as
+soon as the run ends.
 
-| State     | Chip                                     |
-|-----------|------------------------------------------|
-| working   | spinning arc, dimmed mark and label      |
-| done      | closed ring, `✓`, and a short green pulse on the switch |
-| attention | breathing ring and `!` in the theme's urgent color |
+### Which windows are read
 
-Clicking a chip focuses that window.
+Only terminal windows are parsed: everything `omarchy-launch-tui` opens (app
+ids starting with `org.omarchy.` or `TUI.`), the terminals Omarchy ships
+(foot, Alacritty, Ghostty, kitty, WezTerm) and the app ids `claude` and
+`codex`. Windows of other apps are ignored even when their title happens to
+match, so `Inbox | Mail` never becomes a session. A custom
+`omarchy-launch-tui --app-id` can be added through the `extraAppIds` setting.
 
-At most `maxSessions` chips are drawn; anything beyond that is summed up in a
-single `+n` chip whose tooltip names the rest. The chips share a width budget
-of roughly a quarter of the screen, so names are elided sooner while several
-sessions are open and the left section never grows over the centered clock.
+### Not covered
+
+- Any other agent (Gemini CLI, OpenCode, Aider, ...) is not detected.
+- A pending approval prompt is not shown as attention for either agent, see
+  above.
+- Sessions in a terminal multiplexer such as tmux are only seen if the
+  multiplexer passes the pane title through to the window title, and Claude
+  Code then always shows as done.
+- This widget shows session state, not usage or rate limits. For those use
+  the built-in `omarchy.agents` widget; both can sit in the bar side by side.
 
 ## Settings
 
@@ -69,31 +119,52 @@ the widget's entry in `~/.config/omarchy/shell.json`:
 
 | Key              | Default   | Meaning |
 |------------------|-----------|---------|
-| `maxWidth`       | `180`     | upper bound for a session name; the shared budget can elide sooner |
-| `maxSessions`    | `4`       | chips before the rest collapses into `+n` |
+| `maxWidth`       | `180`     | upper bound for a session name in pixels (60 to 480); the shared budget can elide sooner |
+| `maxSessions`    | `4`       | chips before the rest collapses into `+n` (1 to 12) |
 | `doneColor`      | `#4ade80` | ring, checkmark and pulse when done |
-| `attentionColor` | theme     | ring when the agent needs a decision |
+| `attentionColor` | theme     | ring while a Codex run reports Waiting, Blocked or Approval |
 | `claudeColor`    | `#d97757` | Claude mark |
 | `codexColor`     | bar text  | Codex mark |
+| `extraAppIds`    | empty     | comma-separated extra app ids to read titles from |
 
-An empty color falls back to the default.
+Colors take `#RGB`, `#RRGGBB`, `#RRGGBBAA`, `rgb(r,g,b)` or a theme role such
+as `accent`, `urgent` or `foreground`. An empty or unreadable value falls back
+to the default; numbers outside their range are clamped.
+
+## Adding an agent
+
+Detection lives in one function, `sessionFor(title, appId)` in
+`AgentStatus.qml`. It receives a window title and returns `null` or an object
+with `agent`, `state` (`busy`, `ready` or `attention`), `name`, `context` and
+`detail`. A new agent needs a branch in that function and, for its own mark,
+an entry in `AgentMark.qml`. Pull requests are welcome.
 
 ## Dependencies
 
-None beyond the Omarchy shell itself. The widget uses only the Quickshell
-modules that ship with Omarchy (`Quickshell.Wayland` for the toplevel list)
-and runs no external commands.
+None beyond the Omarchy shell. The widget uses only the Quickshell modules
+that ship with Omarchy and runs no external commands.
+
+## Upgrading from `mae.agent-status`
+
+Versions before 2.1.0 used the id `mae.agent-status`. Remove the old copy and
+install this one, then move it back to where it was:
+
+```bash
+omarchy plugin remove mae.agent-status
+omarchy plugin add https://github.com/mae240/omarchy-agent-status.git --enable
+```
 
 ## Development
 
 ```bash
-git clone https://github.com/mae240/omarchy-agent-status.git ~/.config/omarchy/plugins/io.github.mae240.agent-status
+git clone https://github.com/mae240/omarchy-agent-status.git \
+  ~/.config/omarchy/plugins/io.github.mae240.agent-status
 omarchy plugin validate ~/.config/omarchy/plugins/io.github.mae240.agent-status
 omarchy plugin enable io.github.mae240.agent-status
 ```
 
-After editing the QML, run `omarchy restart shell`; the hot reload does not
-always pick up changed plugin files.
+After editing the QML run `omarchy restart shell`. The shell's hot reload does
+not reliably pick up changed plugin files.
 
 ## License
 

@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "id": "io.github.mae240.agent-status",
   "name": "Agent Status",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "author": "Matteo Moser",
   "license": "MIT",
   "description": "Shows open Claude Code and Codex sessions with the agent's mark and a live working/done indicator",
@@ -30,7 +30,8 @@
       "doneColor": "#4ade80",
       "attentionColor": "",
       "claudeColor": "#d97757",
-      "codexColor": ""
+      "codexColor": "",
+      "extraAppIds": ""
     },
     "schema": [
       {
@@ -51,28 +52,28 @@
         "max": 12,
         "step": 1,
         "defaultValue": 4,
-        "description": "Sessions past this count are summed up in one \"+n\" chip, so the bar cannot grow into its center section."
+        "description": "Sessions past this count are summed up in one \"+n\" chip. The cap drops further on narrow screens, so the bar cannot grow into its center section."
       },
       {
         "key": "doneColor",
         "type": "string",
         "label": "Done color",
         "defaultValue": "#4ade80",
-        "description": "Ring, checkmark and pulse once the agent is waiting for you."
+        "description": "Ring, checkmark and pulse once the agent is waiting for you. Hex, rgb() or a theme role such as accent."
       },
       {
         "key": "attentionColor",
         "type": "string",
         "label": "Attention color",
         "defaultValue": "",
-        "description": "Ring while the agent needs a decision. Empty follows the theme's urgent color."
+        "description": "Ring while a Codex run reports Waiting, Blocked or Approval. Empty follows the theme's urgent color."
       },
       {
         "key": "claudeColor",
         "type": "string",
         "label": "Claude mark color",
         "defaultValue": "#d97757",
-        "description": "Empty follows the bar foreground."
+        "description": "Empty restores the default orange."
       },
       {
         "key": "codexColor",
@@ -80,6 +81,13 @@
         "label": "Codex mark color",
         "defaultValue": "",
         "description": "Empty follows the bar foreground."
+      },
+      {
+        "key": "extraAppIds",
+        "type": "string",
+        "label": "Extra terminal app ids",
+        "defaultValue": "",
+        "description": "Comma-separated app ids to read titles from besides the terminals Omarchy ships, e.g. for a custom omarchy-launch-tui --app-id."
       }
     ]
   }

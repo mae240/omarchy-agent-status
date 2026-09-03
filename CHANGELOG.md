@@ -1,5 +1,18 @@
 # Changelog
 
+## 2.2.0
+
+- Tooltips work: the bar only shows them for a hovered chip, not for the widget as a whole.
+- The done pulse only fires for a visible working-to-done switch, not when a session first appears.
+- Unreadable colors fall back to the default instead of rendering black; theme roles such as `accent` are accepted.
+- `maxSessions` and `maxWidth` are clamped to their documented ranges.
+- The width budget also caps the number of chips, so the bar never reaches the clock however many sessions are open.
+- More terminals are recognised (`org.codeberg.dnkl.foot`, `wezterm`, `TUI.*`, `claude`, `codex`), plus an `extraAppIds` setting for custom app ids.
+- A Codex chip keeps its label while the thread is still unnamed instead of switching from project to thread title.
+- The attention ring returns to its resting opacity after breathing.
+- Marks and rings are drawn as vectors through the curve renderer instead of a scaled 24 px texture.
+- README states what is and is not detected: Claude Code and Codex only, no approval prompts, tmux caveat.
+
 ## 2.1.0
 
 - Published as a standalone repository for the Omarchy plugin marketplace.

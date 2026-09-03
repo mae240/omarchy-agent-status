@@ -3,8 +3,9 @@ import QtQuick.Shapes
 import qs.Commons
 
 // Brand mark for the agent behind a session chip. Both glyphs are the
-// vendors' own monochrome marks, drawn from their 24x24 outlines so they
-// scale with the bar font instead of depending on an icon font.
+// vendors' own monochrome marks, drawn from their 24x24 outlines through the
+// curve renderer, so they scale with the bar font as vectors instead of
+// depending on an icon font or a rasterised texture.
 Item {
   id: root
 
@@ -25,8 +26,7 @@ Item {
     width: 24
     height: 24
     antialiasing: true
-    layer.enabled: true
-    layer.samples: 4
+    preferredRendererType: Shape.CurveRenderer
     transform: Scale {
       xScale: root.iconSize / 24
       yScale: root.iconSize / 24
