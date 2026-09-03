@@ -14,6 +14,7 @@
 - README states what is and is not detected: Claude Code and Codex only, no approval prompts, tmux caveat.
 - Codex setup is shown during installation, and only known Codex run states are accepted so unrelated terminal titles cannot become false sessions.
 - README includes a polished visual of the Claude Code and Codex working/ready chip states and distinguishes them from terminal-title markers.
+- README is reorganized around a single top-level preview, setup, usage, settings and concise detection details.
 
 ## 2.1.0
 
