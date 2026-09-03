@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "id": "io.github.mae240.agent-status",
+  "name": "Agent Status",
+  "version": "2.1.0",
+  "author": "Matteo Moser",
+  "license": "MIT",
+  "description": "Shows open Claude Code and Codex sessions with the agent's mark and a live working/done indicator",
+  "kinds": [
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "barWidget": "AgentStatus.qml"
+  },
+  "barWidget": {
+    "displayName": "Agent Status",
+    "description": "Open Claude Code / Codex sessions with working, done and attention state",
+    "category": "AI",
+    "aliases": [
+      "agent",
+      "claude",
+      "codex",
+      "sessions"
+    ],
+    "allowMultiple": false,
+    "defaultSection": "left",
+    "defaults": {
+      "maxWidth": 180,
+      "maxSessions": 4,
+      "doneColor": "#4ade80",
+      "attentionColor": "",
+      "claudeColor": "#d97757",
+      "codexColor": ""
+    },
+    "schema": [
+      {
+        "key": "maxWidth",
+        "type": "integer",
+        "label": "Maximum session name width",
+        "min": 60,
+        "max": 480,
+        "step": 10,
+        "defaultValue": 180,
+        "description": "Longer session names are elided at this width."
+      },
+      {
+        "key": "maxSessions",
+        "type": "integer",
+        "label": "Maximum sessions shown",
+        "min": 1,
+        "max": 12,
+        "step": 1,
+        "defaultValue": 4,
+        "description": "Sessions past this count are summed up in one \"+n\" chip, so the bar cannot grow into its center section."
+      },
+      {
+        "key": "doneColor",
+        "type": "string",
+        "label": "Done color",
+        "defaultValue": "#4ade80",
+        "description": "Ring, checkmark and pulse once the agent is waiting for you."
+      },
+      {
+        "key": "attentionColor",
+        "type": "string",
+        "label": "Attention color",
+        "defaultValue": "",
+        "description": "Ring while the agent needs a decision. Empty follows the theme's urgent color."
+      },
+      {
+        "key": "claudeColor",
+        "type": "string",
+        "label": "Claude mark color",
+        "defaultValue": "#d97757",
+        "description": "Empty follows the bar foreground."
+      },
+      {
+        "key": "codexColor",
+        "type": "string",
+        "label": "Codex mark color",
+        "defaultValue": "",
+        "description": "Empty follows the bar foreground."
+      }
+    ]
+  }
+}
