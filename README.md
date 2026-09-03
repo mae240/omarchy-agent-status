@@ -45,6 +45,11 @@ and deletes the plugin directory. The plugin writes nothing else to your system.
 
 ## What you see
 
+The chips themselves—not the terminal-title markers used for detection—look
+like this:
+
+![Claude Code ready, Codex working, and Codex ready chips](chip-states.png)
+
 | State     | Chip                                                           |
 |-----------|----------------------------------------------------------------|
 | working   | spinning arc, mark and name dimmed                             |
@@ -69,7 +74,9 @@ Quickshell's toplevel list.
 
 ### Claude Code
 
-Works out of the box. Claude Code writes its state into the terminal title:
+Works out of the box. Claude Code writes its state into the terminal title.
+These glyphs are detection signals; the bar renders the Claude mark and status
+ring shown above instead of displaying the glyph itself:
 
 | Title             | Meaning               |
 |-------------------|-----------------------|
