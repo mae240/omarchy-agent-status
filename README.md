@@ -22,6 +22,18 @@ left bar section next to the workspaces. To move it:
 omarchy bar move io.github.mae240.agent-status --section right
 ```
 
+Claude Code works immediately. For Codex, add the following to
+`~/.codex/config.toml` before starting Codex:
+
+```toml
+[tui]
+terminal_title = ["run-state", "thread-title", "project-name"]
+```
+
+Restart any Codex sessions that were already open. Without this setting, Codex
+is detectable only while it is working and disappears from the widget when it
+becomes idle.
+
 ## Remove
 
 ```bash
@@ -83,7 +95,7 @@ terminal_title = ["run-state", "thread-title", "project-name"]
 The title then reads `<Run state> | <thread title> | <project>`, which gives
 the chip the thread title as its name, the project in the tooltip and the
 run state as its status. `Ready`, `Idle` and `Done` count as done; `Waiting`,
-`Blocked` and `Approval` as attention; any other word as working. Until Codex
+`Blocked` and `Approval` as attention; `Working` counts as working. Until Codex
 has named the thread the chip reads `Codex`. Note that Codex keeps reporting
 `Working` while an approval prompt is open; `Waiting` currently only appears
 while it waits on a background terminal, so the attention state is rare.

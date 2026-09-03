@@ -22,9 +22,10 @@ BarWidget {
   readonly property string codexBusyGlyphs: "⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏⠍⠌⠓⠒⠆⠖⠶"
   readonly property string readyGlyphs: "✳✻✽✶✢❋⁕*·⏺"
 
-  // Codex run-state words, as they land in the first title segment. Unknown
-  // words count as work in progress rather than being dropped, so a state from
-  // a future Codex release still shows up as a session.
+  // Codex run-state words, as they land in the first title segment. Keep this
+  // list explicit: accepting every leading word would turn unrelated terminal
+  // titles such as "Vim | project" into false Codex sessions.
+  readonly property var codexBusy: ["Working"]
   readonly property var codexReady: ["Ready", "Idle", "Done"]
   readonly property var codexAttention: ["Waiting", "Blocked", "Approval"]
 
@@ -128,6 +129,8 @@ BarWidget {
     var runState = /^([A-Z][a-z]+)\s+\|\s+(.+)$/.exec(title)
     if (runState) {
       var word = runState[1]
+      if (codexBusy.indexOf(word) < 0 && codexReady.indexOf(word) < 0
+          && codexAttention.indexOf(word) < 0) return null
       var state = codexReady.indexOf(word) >= 0 ? "ready"
         : codexAttention.indexOf(word) >= 0 ? "attention" : "busy"
       // Remaining segments are thread title and project, in the order
